@@ -24,10 +24,10 @@
 
 
 def main():
-  """Malloy Python Runtime Library"""
+    """Malloy Python Runtime Library"""
 
-  print("Hello Python")
+    print("Hello Python")
 
 
 if __name__ == "__main__":
-  main()
+    main()

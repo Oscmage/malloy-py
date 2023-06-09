@@ -23,9 +23,13 @@
 """Module contains classes and interfaces Malloy needs for dealing with 
    data. """
 from malloy.data.connection import ConnectionInterface
-from malloy.data.connection_manager import ConnectionManagerInterface, DefaultConnectionManager
+from malloy.data.connection_manager import (
+    ConnectionManagerInterface,
+    DefaultConnectionManager,
+)
 
 __all__ = [
-    "ConnectionInterface", "ConnectionManagerInterface",
-    "DefaultConnectionManager"
+    "ConnectionInterface",
+    "ConnectionManagerInterface",
+    "DefaultConnectionManager",
 ]

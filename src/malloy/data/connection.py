@@ -26,29 +26,33 @@ from collections.abc import Sequence
 
 
 class ConnectionInterface(metaclass=abc.ABCMeta):
-  """Basic definition of a Malloy connection interface. """
+    """Basic definition of a Malloy connection interface."""
 
-  @classmethod
-  def __subclasshook__(cls, subclass):
-    return (hasattr(subclass, "get_schema_for_tables") and
-            callable(subclass.get_schema_for_tables) and
-            hasattr(subclass, "run_query") and callable(subclass.run_query) and
-            hasattr(subclass, "get_name") and callable(subclass.get_name) and
-            hasattr(subclass, "get_schema_for_sql_block") and
-            callable(subclass.get_schema_for_sql_block))
+    @classmethod
+    def __subclasshook__(cls, subclass):
+        return (
+            hasattr(subclass, "get_schema_for_tables")
+            and callable(subclass.get_schema_for_tables)
+            and hasattr(subclass, "run_query")
+            and callable(subclass.run_query)
+            and hasattr(subclass, "get_name")
+            and callable(subclass.get_name)
+            and hasattr(subclass, "get_schema_for_sql_block")
+            and callable(subclass.get_schema_for_sql_block)
+        )
 
-  @abc.abstractmethod
-  def get_name(self, sql: str):
-    raise NotImplementedError
+    @abc.abstractmethod
+    def get_name(self, sql: str):
+        raise NotImplementedError
 
-  @abc.abstractmethod
-  def get_schema_for_tables(self, tables: Sequence[str]):
-    raise NotImplementedError
+    @abc.abstractmethod
+    def get_schema_for_tables(self, tables: Sequence[str]):
+        raise NotImplementedError
 
-  @abc.abstractmethod
-  def get_schema_for_sql_block(self, name: str, sql: str):
-    raise NotImplementedError
+    @abc.abstractmethod
+    def get_schema_for_sql_block(self, name: str, sql: str):
+        raise NotImplementedError
 
-  @abc.abstractmethod
-  def run_query(self, sql: str):
-    raise NotImplementedError
+    @abc.abstractmethod
+    def run_query(self, sql: str):
+        raise NotImplementedError

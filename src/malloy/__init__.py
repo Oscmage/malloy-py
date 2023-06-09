@@ -24,6 +24,6 @@
 # Version of the python malloy package
 __version__ = "2023.1010"
 
-from malloy.runtime import (Runtime)
+from malloy.runtime import Runtime
 
 __all__ = ["Runtime"]

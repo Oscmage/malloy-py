@@ -29,79 +29,81 @@ from pathlib import Path
 
 
 class ServiceManager:
-  """A class that manages the connection to a Malloy compiler service. """
-  _internal_service = "localhost:14310"
+    """A class that manages the connection to a Malloy compiler service."""
 
-  @staticmethod
-  def service_path():
-    service_name = "malloy-service"
-    system = platform.system()
-    if system == "Windows":
-      service_name += "-win"
-    elif system == "Linux":
-      service_name += "-linux"
-    elif system == "Darwin":
-      service_name += "-macos"
+    _internal_service = "localhost:14310"
 
-    arch = platform.machine()
-    if arch == "x86_64" or system == "Darwin" or system == "Windows":
-      service_name += "-x64"
-    elif arch == "arm64":
-      service_name += "-arm64"
+    @staticmethod
+    def service_path():
+        service_name = "malloy-service"
+        system = platform.system()
+        if system == "Windows":
+            service_name += "-win"
+        elif system == "Linux":
+            service_name += "-linux"
+        elif system == "Darwin":
+            service_name += "-macos"
 
-    if system == "Windows":
-      service_name += ".exe"
+        arch = platform.machine()
+        if arch == "x86_64" or system == "Darwin" or system == "Windows":
+            service_name += "-x64"
+        elif arch == "arm64":
+            service_name += "-arm64"
 
-    service_path = f"{Path(Path(__file__).parent, service_name).resolve()}"
-    return service_path
+        if system == "Windows":
+            service_name += ".exe"
 
-  def __init__(self, external_service=None):
-    self._log = logging.getLogger(__name__)
-    self._is_ready = asyncio.Event()
-    self._external_service = external_service
-    self._proc = None
+        service_path = f"{Path(Path(__file__).parent, service_name).resolve()}"
+        return service_path
 
-  def is_ready(self):
-    return self._is_ready.is_set()
+    def __init__(self, external_service=None):
+        self._log = logging.getLogger(__name__)
+        self._is_ready = asyncio.Event()
+        self._external_service = external_service
+        self._proc = None
 
-  async def get_service(self):
-    if not self._is_ready.is_set():
-      await self._spawn_service()
+    def is_ready(self):
+        return self._is_ready.is_set()
 
-    if self._external_service is None:
-      return self._internal_service
-    return self._external_service
+    async def get_service(self):
+        if not self._is_ready.is_set():
+            await self._spawn_service()
 
-  async def _spawn_service(self):
-    if self._external_service is not None:
-      self._log.debug("Using external service: %s", self._external_service)
-      self._is_ready.set()
-      return
+        if self._external_service is None:
+            return self._internal_service
+        return self._external_service
 
-    service_path = ServiceManager.service_path()
-    self._log.debug("Starting compiler service: %s", service_path)
+    async def _spawn_service(self):
+        if self._external_service is not None:
+            self._log.debug("Using external service: %s", self._external_service)
+            self._is_ready.set()
+            return
 
-    self._proc = await asyncio.create_subprocess_exec(
-        service_path,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT,
-        env={"PORT": "0"})
+        service_path = ServiceManager.service_path()
+        self._log.debug("Starting compiler service: %s", service_path)
 
-    service_listening = re.compile(r"^Server listening on (\d+)$")
-    line = await self._proc.stdout.readline()
-    if line is not None:
-      sline = line.decode().rstrip()
-      match = service_listening.match(sline)
-      if match:
-        self._log.debug("Compiler service is running: %s", sline)
-        self._internal_service = "localhost:" + match.group(1)
-        self._is_ready.set()
-      else:
-        self._log.debug("Compiler service NOT running: %s", sline)
+        self._proc = await asyncio.create_subprocess_exec(
+            service_path,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,
+            env={"PORT": "0"},
+        )
 
-  def _kill_service(self):
-    if self._proc is None:
-      return
-    self._log.debug("Terminating compiler service")
-    self._proc.kill()
-    self._proc = None
+        service_listening = re.compile(r"^Server listening on (\d+)$")
+        line = await self._proc.stdout.readline()
+        if line is not None:
+            sline = line.decode().rstrip()
+            match = service_listening.match(sline)
+            if match:
+                self._log.debug("Compiler service is running: %s", sline)
+                self._internal_service = "localhost:" + match.group(1)
+                self._is_ready.set()
+            else:
+                self._log.debug("Compiler service NOT running: %s", sline)
+
+    def _kill_service(self):
+        if self._proc is None:
+            return
+        self._log.debug("Terminating compiler service")
+        self._proc.kill()
+        self._proc = None

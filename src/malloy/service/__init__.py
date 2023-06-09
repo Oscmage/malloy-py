@@ -21,6 +21,6 @@
 
 # __init__.py
 """Module provides connections and management of a Malloy compiler service. """
-from malloy.service.service_manager import (ServiceManager)
+from malloy.service.service_manager import ServiceManager
 
 __all__ = ["ServiceManager"]
